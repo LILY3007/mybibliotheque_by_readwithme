@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon coin lecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EFDFCB;
+    --paper-2: #E6D3B8;
+    --card: #FAF2E5;
+    --ink: #3A2418;
+    --ink-soft: #765846;
+    --line: #D5BC9A;
+    --pumpkin: #B84C14;
+    --moss: #55692F;
+    --plum: #7A3B4F;
+    --mustard: #C98A1E;
+    --on-accent: #FFF6E8;
+    --shadow: rgba(70, 35, 12, .42);
+    --backdrop: rgba(45, 25, 15, .55);
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --sans: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1D1216;
+      --paper-2: #2A1B21;
+      --card: #33222A;
+      --ink: #F3E3CB;
+      --ink-soft: #BFA189;
+      --line: #4D343C;
+      --pumpkin: #F09A52;
+      --moss: #A9BE74;
+      --plum: #E39AB0;
+      --mustard: #F0BE5A;
+      --on-accent: #2A140A;
+      --shadow: rgba(0, 0, 0, .55);
+      --backdrop: rgba(10, 5, 8, .68);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1D1216;
+    --paper-2: #2A1B21;
+    --card: #33222A;
+    --ink: #F3E3CB;
+    --ink-soft: #BFA189;
+    --line: #4D343C;
+    --pumpkin: #F09A52;
+    --moss: #A9BE74;
+    --plum: #E39AB0;
+    --mustard: #F0BE5A;
+    --on-accent: #2A140A;
+    --shadow: rgba(0, 0, 0, .55);
+    --backdrop: rgba(10, 5, 8, .68);
+  }
+
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--paper); }
+  *, *::before, *::after { box-sizing: inherit; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--paper);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .28 0 0 0 0 .16 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--pumpkin); outline-offset: 3px; border-radius: 6px; }
+
+  #leaves { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .fall {
+    position: absolute; top: 0; opacity: .42;
+    animation-name: fall; animation-timing-function: linear; animation-iteration-count: infinite;
+  }
+  .fall svg { width: 100%; height: 100%; display: block; animation: sway 4.2s ease-in-out infinite alternate; --leaf-fill: currentColor; --vein: transparent; }
+  @keyframes fall {
+    from { transform: translate3d(0, -12vh, 0) rotate(0deg); }
+    to   { transform: translate3d(var(--dx), 112vh, 0) rotate(var(--rot)); }
+  }
+  @keyframes sway {
+    from { transform: translateX(-14px) rotate(-28deg); }
+    to   { transform: translateX(14px) rotate(28deg); }
+  }
+
+  svg.leaf path.shape { fill: var(--leaf-fill, transparent); stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+  svg.leaf path.vein { stroke: var(--vein, currentColor); stroke-width: 1.5; stroke-linecap: round; fill: none; }
+
+  .wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 1.6rem clamp(1rem, 4vw, 2rem) 5rem; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: .9rem; min-width: 0; }
+  .brand svg { flex: none; width: 52px; height: 52px; }
+  h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(1.7rem, 4.5vw, 2.6rem); line-height: 1.05; margin: 0; letter-spacing: -.01em; font-variation-settings: "opsz" 144; }
+  #stats { margin: .25rem 0 0; color: var(--ink-soft); font-weight: 600; font-size: .95rem; }
+  .actions { display: flex; align-items: center; gap: .6rem; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    border: 2px solid transparent; border-radius: 999px; padding: .65rem 1.2rem;
+    font-weight: 800; font-size: .98rem; line-height: 1.1; transition: transform .15s, filter .15s, background .15s;
+  }
+  .btn svg { width: 18px; height: 18px; flex: none; }
+  .btn.primary { background: var(--pumpkin); color: var(--on-accent); }
+  .btn.primary:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+  .btn.ghost:hover { background: var(--paper-2); }
+  .btn.danger { background: var(--plum); color: var(--on-accent); }
+  .btn.small { padding: .45rem .9rem; font-size: .88rem; }
+  .icon-btn {
+    display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid var(--line); background: transparent; color: var(--ink);
+  }
+  .icon-btn:hover { background: var(--paper-2); }
+  .icon-btn svg { width: 20px; height: 20px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin: 2rem 0 1.6rem; }
+  .search { position: relative; flex: 1 1 240px; min-width: 200px; }
+  .search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--ink-soft); }
+  .search input { width: 100%; padding: .7rem 1rem .7rem 2.7rem; }
+  input, select, textarea {
+    background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: .65rem .9rem; font-size: 1rem; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--pumpkin); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pumpkin) 28%, transparent); }
+  ::placeholder { color: var(--ink-soft); opacity: .75; }
+  .tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .tab {
+    border: 2px solid var(--line); background: transparent; border-radius: 999px; padding: .45rem .95rem; font-weight: 700; font-size: .92rem;
+  }
+  .tab span { opacity: .65; margin-left: .3rem; font-weight: 600; }
+  .tab[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .tab:not([aria-pressed="true"]):hover { background: var(--paper-2); }
+  #sort { width: auto; padding-right: 2rem; font-weight: 700; }
+
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 2.2rem 1.4rem; }
+  .card { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0; }
+  .cover {
+    display: block; position: relative; aspect-ratio: 2 / 3; border-radius: 3px 9px 9px 3px; overflow: hidden;
+    background: var(--paper-2);
+    box-shadow: inset 7px 0 7px -5px rgba(0,0,0,.4), inset -1px 0 0 rgba(255,255,255,.12), 0 14px 20px -12px var(--shadow);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 7px 0 7px -5px rgba(0,0,0,.4); pointer-events: none; }
+  .card:hover .cover { transform: translateY(-5px) rotate(-1deg); box-shadow: inset 7px 0 7px -5px rgba(0,0,0,.4), 0 22px 24px -12px var(--shadow); }
+  .ph {
+    width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; gap: .6rem;
+    padding: 1.1rem 1rem 1rem 1.4rem; background: var(--c); color: var(--t); position: relative;
+  }
+  .ph::before { content: ""; position: absolute; inset: 9px 9px 9px 15px; border: 1.5px solid currentColor; opacity: .35; border-radius: 2px 6px 6px 2px; pointer-events: none; }
+  .ph-title { font-family: var(--serif); font-weight: 700; font-size: 1.12rem; line-height: 1.15; overflow-wrap: anywhere; position: relative; }
+  .ph-author { font-size: .8rem; font-weight: 700; opacity: .85; position: relative; }
+  .ph svg { width: 22px; height: 22px; position: relative; --leaf-fill: currentColor; --vein: var(--c); opacity: .9; }
+  .big .ph-title { font-size: 1.7rem; }
+  .big .ph-author { font-size: 1rem; }
+  .big .ph svg { width: 30px; height: 30px; }
+  .card-meta { display: flex; flex-direction: column; gap: .15rem; margin-top: .8rem; }
+  .card-title { font-family: var(--serif); font-weight: 650; font-size: 1.02rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-author { color: var(--ink-soft); font-size: .88rem; font-weight: 600; }
+  .card-foot { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-top: .3rem; flex-wrap: wrap; }
+  .stars { display: inline-flex; gap: 1px; color: var(--line); }
+  .stars svg { width: 15px; height: 15px; }
+  .stars .on { color: var(--pumpkin); --leaf-fill: currentColor; --vein: var(--paper); }
+  .pill { display: inline-flex; align-items: center; gap: .35rem; font-size: .78rem; font-weight: 800; color: var(--ink-soft); }
+  .pill i { width: 9px; height: 9px; border-radius: 50%; background: var(--mustard); }
+  .s-reading i { background: var(--pumpkin); }
+  .s-read i { background: var(--moss); }
+
+  .empty { text-align: center; max-width: 440px; margin: 3rem auto 0; }
+  .empty svg { width: min(260px, 70%); height: auto; margin-bottom: 1rem; }
+  .empty h2 { font-family: var(--serif); font-size: 1.6rem; margin: 0 0 .4rem; }
+  .empty p { margin: 0 0 1.4rem; color: var(--ink-soft); }
+  .empty .row { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+
+  dialog {
+    padding: 0; border: 2px solid var(--line); border-radius: 22px; background: var(--card); color: var(--ink);
+    width: min(940px, 100vw); max-width: 100vw; max-height: min(92dvh, 960px); overflow: hidden;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.6);
+  }
+  dialog[open] { display: flex; flex-direction: column; animation: pop .22s ease-out; }
+  dialog::backdrop { background: var(--backdrop); backdrop-filter: blur(3px); }
+  @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+  dialog form { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+  .dlg-head, .dlg-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1.4rem; flex: none; }
+  .dlg-head { padding-top: calc(.9rem + env(safe-area-inset-top, 0px)); border-bottom: 2px solid var(--line); }
+  .dlg-foot { justify-content: flex-end; border-top: 2px solid var(--line); padding-bottom: calc(.9rem + env(safe-area-inset-bottom, 0px)); background: var(--card); }
+  .dlg-head h2 { margin: 0; font-family: var(--serif); font-size: 1.4rem; }
+  .dlg-body { overflow-y: auto; padding: 1.4rem; flex: 1; min-height: 0; }
+
+  .form-grid { display: grid; grid-template-columns: 230px 1fr; gap: 2rem; align-items: start; }
+  .cover-col { display: flex; flex-direction: column; gap: .7rem; position: sticky; top: 0; }
+  .cover-drop {
+    width: 100%; aspect-ratio: 2 / 3; border: 2px dashed var(--line); border-radius: 3px 12px 12px 3px; background: var(--paper);
+    display: grid; place-items: center; text-align: center; padding: 1rem; color: var(--ink-soft); font-weight: 700; overflow: hidden; position: relative;
+  }
+  .cover-drop:hover, .cover-drop.over { border-color: var(--pumpkin); background: var(--paper-2); }
+  .cover-drop.has { border-style: solid; padding: 0; }
+  .cover-drop img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover-drop svg { width: 34px; height: 34px; margin: 0 auto .5rem; display: block; color: var(--pumpkin); }
+  .cover-drop small { display: block; font-weight: 600; margin-top: .25rem; opacity: .85; }
+  .fields { display: flex; flex-direction: column; gap: 1.6rem; min-width: 0; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { font-family: var(--serif); font-weight: 700; font-size: 1.2rem; padding: 0; margin-bottom: .8rem; }
+  .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .9rem; }
+  .field { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .9rem; }
+  .field:last-child { margin-bottom: 0; }
+  .row2 .field { margin-bottom: 0; }
+  .row2 + .field, .field + .row2, .row2 + .row2 { margin-top: .9rem; }
+  label, .lbl { font-weight: 800; font-size: .9rem; }
+  .hint { font-weight: 600; color: var(--ink-soft); font-size: .82rem; }
+  textarea { resize: vertical; min-height: 110px; line-height: 1.5; }
+  #f-quote { font-family: var(--serif); font-style: italic; min-height: 80px; }
+
+  .seg { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .seg label {
+    border: 2px solid var(--line); border-radius: 999px; padding: .45rem 1rem; cursor: pointer; font-weight: 800; font-size: .92rem;
+    display: inline-flex; align-items: center; gap: .45rem;
+  }
+  .seg input:checked + label { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .seg input:focus-visible + label { outline: 3px solid var(--pumpkin); outline-offset: 3px; }
+  .rate-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+  .leaf-btn { background: none; border: 0; padding: 3px; color: var(--line); border-radius: 8px; transition: transform .12s; }
+  .leaf-btn svg { width: 30px; height: 30px; display: block; }
+  .leaf-btn:hover { transform: scale(1.12) rotate(-6deg); color: var(--pumpkin); }
+  .leaf-btn.on { color: var(--pumpkin); --leaf-fill: currentColor; --vein: var(--card); }
+  .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip { border: 2px solid var(--line); background: transparent; border-radius: 999px; padding: .3rem .85rem; font-weight: 700; font-size: .88rem; }
+  .chip:hover { background: var(--paper-2); }
+  .chip[aria-pressed="true"] { background: var(--plum); border-color: var(--plum); color: var(--on-accent); }
+  .chip.static { cursor: default; background: var(--plum); border-color: var(--plum); color: var(--on-accent); }
+
+  .view-grid { display: grid; grid-template-columns: 240px 1fr; gap: 2rem; align-items: start; }
+  .view-grid .cover { position: sticky; top: 0; }
+  .v-title { font-family: var(--serif); font-weight: 750; font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.08; margin: 0; padding-right: 2.5rem; letter-spacing: -.01em; }
+  .v-author { margin: .3rem 0 1rem; font-size: 1.1rem; color: var(--ink-soft); font-weight: 700; }
+  .v-meta { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1rem; }
+  .v-meta span.m { background: var(--paper); border: 1.5px solid var(--line); border-radius: 8px; padding: .15rem .6rem; font-size: .85rem; font-weight: 700; }
+  .v-status { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .v-status .stars svg { width: 24px; height: 24px; }
+  .v-dates { color: var(--ink-soft); font-weight: 600; font-size: .92rem; margin: 0 0 1.2rem; }
+  .v-sec { margin-top: 1.5rem; }
+  .v-sec h3 { font-family: var(--serif); font-size: 1.2rem; margin: 0 0 .35rem; }
+  .v-sec p { margin: 0; white-space: pre-wrap; max-width: 62ch; }
+  blockquote { margin: 0; padding: .2rem 0 .2rem 1.1rem; border-left: 4px solid var(--pumpkin); font-family: var(--serif); font-style: italic; font-size: 1.2rem; line-height: 1.5; white-space: pre-wrap; max-width: 52ch; }
+  .v-none { color: var(--ink-soft); margin-top: 1.5rem; }
+  .v-close { position: absolute; top: calc(.8rem + env(safe-area-inset-top, 0px)); right: .9rem; z-index: 2; background: var(--card); }
+  .v-actions { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
+
+  #toast {
+    position: fixed; left: 50%; bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 30px); opacity: 0; pointer-events: none;
+    background: var(--ink); color: var(--paper); padding: .7rem 1.2rem; border-radius: 999px; font-weight: 800; z-index: 100; transition: .25s; max-width: 90vw; text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 720px) {
+    dialog { width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; border: 0; }
+    .form-grid, .view-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+    .cover-col { position: static; max-width: 190px; margin: 0 auto; width: 100%; }
+    .view-grid .cover { position: static; max-width: 200px; margin: 0 auto; width: 100%; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 1.8rem 1rem; }
+    .dlg-body { padding: 1.1rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="leaves" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M24 10c-3 4 3 6 0 10M33 8c-3 4 3 6 0 10" fill="none" stroke="var(--ink-soft)" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M12 26h34v14a14 14 0 0 1-14 14h-6a14 14 0 0 1-14-14z" fill="var(--pumpkin)"/>
+        <path d="M46 30h4a6 6 0 0 1 0 12h-5" fill="none" stroke="var(--pumpkin)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M18 33h22" stroke="var(--on-accent)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+        <rect x="8" y="56" width="42" height="4" rx="2" fill="var(--ink)" opacity=".85"/>
+      </svg>
+      <div>
+        <h1>Mon coin lecture</h1>
+        <p id="stats"></p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Changer de thème"></button>
+      <button class="btn primary" id="newBtn" type="button"></button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Chercher un titre, un auteur, un genre" aria-label="Chercher dans mes fiches" autocomplete="off">
+    </div>
+    <div class="tabs" role="group" aria-label="Filtrer par statut" id="tabs"></div>
+    <select id="sort" aria-label="Trier les fiches">
+      <option value="recent">Récentes d'abord</option>
+      <option value="title">Titre (A à Z)</option>
+      <option value="author">Auteur (A à Z)</option>
+      <option value="rating">Mieux notées</option>
+    </select>
+  </div>
+
+  <main>
+    <ul class="grid" id="grid"></ul>
+    <div id="empty" class="empty" hidden></div>
+  </main>
+</div>
+
+<dialog id="viewDlg" aria-labelledby="v-title">
+  <button class="icon-btn v-close" type="button" data-close aria-label="Fermer la fiche"></button>
+  <div class="dlg-body" id="viewBody"></div>
+  <div class="dlg-foot"><div class="v-actions" id="viewActions"></div></div>
+</dialog>
+
+<dialog id="formDlg" aria-labelledby="formTitle">
+  <form id="form">
+    <div class="dlg-head">
+      <h2 id="formTitle">Nouvelle fiche</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer sans enregistrer"></button>
+    </div>
+    <div class="dlg-body">
+      <div class="form-grid">
+        <div class="cover-col">
+          <button type="button" class="cover-drop" id="coverBtn" aria-label="Choisir une image de couverture"></button>
+          <input type="file" id="coverFile" accept="image/*" hidden>
+          <button type="button" class="btn ghost small" id="coverRemove">Retirer l'image</button>
+        </div>
+        <div class="fields">
+          <fieldset>
+            <legend>Le livre</legend>
+            <div class="field"><label for="f-title">Titre</label><input id="f-title" required maxlength="160" autocomplete="off"></div>
+            <div class="field"><label for="f-author">Auteur ou autrice</label><input id="f-author" required maxlength="120" autocomplete="off"></div>
+            <div class="row2">
+              <div class="field"><label for="f-genre">Genre</label><input id="f-genre" list="genres" maxlength="60" placeholder="Roman, polar…" autocomplete="off">
+                <datalist id="genres"><option>Roman</option><option>Polar</option><option>Science-fiction</option><option>Fantasy</option><option>Romance</option><option>Classique</option><option>Biographie</option><option>Essai</option><option>Bande dessinée</option><option>Poésie</option><option>Jeunesse</option><option>Développement personnel</option></datalist>
+              </div>
+              <div class="field"><label for="f-publisher">Éditeur</label><input id="f-publisher" maxlength="80" autocomplete="off"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="f-year">Année de parution</label><input id="f-year" type="number" min="0" max="2100" inputmode="numeric"></div>
+              <div class="field"><label for="f-pages">Nombre de pages</label><input id="f-pages" type="number" min="1" max="9999" inputmode="numeric"></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Ma lecture</legend>
+            <div class="seg" role="radiogroup" aria-label="Statut de lecture">
+              <input type="radio" name="status" id="st-toread" value="toread"><label for="st-toread">À lire</label>
+              <input type="radio" name="status" id="st-reading" value="reading"><label for="st-reading">En cours</label>
+              <input type="radio" name="status" id="st-read" value="read"><label for="st-read">Lu</label>
+            </div>
+            <div class="row2" style="margin-top:.9rem">
+              <div class="field" id="startedField"><label for="f-started">Commencé le</label><input id="f-started" type="date"></div>
+              <div class="field" id="finishedField"><label for="f-finished">Terminé le</label><input id="f-finished" type="date"></div>
+            </div>
+            <div class="field" style="margin-top:.9rem">
+              <span class="lbl">Ma note</span>
+              <div class="rate-row"><div id="ratingInput" role="group" aria-label="Note sur 5"></div><span class="hint" id="ratingText"></span></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Mon avis</legend>
+            <div class="field"><label for="f-summary">Résumé</label><textarea id="f-summary" maxlength="3000" placeholder="De quoi ��a parle, sans spoiler…"></textarea></div>
+            <div class="field"><label for="f-review">Ce que j'en ai pensé</label><textarea id="f-review" maxlength="5000" placeholder="Ce qui m'a plu, ce qui m'a moins plu, ce que j'en retiens…"></textarea></div>
+            <div class="field"><label for="f-quote">Passage préféré</label><textarea id="f-quote" maxlength="1200" placeholder="Une phrase ou un passage que je veux garder"></textarea></div>
+            <div class="field"><span class="lbl">L'ambiance du livre</span><div class="chips" id="moods"></div></div>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost" data-close>Annuler</button>
+      <button type="submit" class="btn primary">Enregistrer la fiche</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (s) { return document.querySelector(s); };
+  var F = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var norm = function (s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); };
+  var plural = function (n, a, b) { return n + ' ' + (n > 1 ? b : a); };
+  var uid = function () { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); };
+
+  var LEAF = '<svg class="leaf" viewBox="0 0 24 24" aria-hidden="true"><path class="shape" d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/><path class="vein" d="M4 20 14 10"/></svg>';
+  var ICON = {
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 9"/></svg>',
+    pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'
+  };
+
+  var STATUS = { toread: 'À lire', reading: 'En cours', read: 'Lu' };
+  var MOODS = ['Doudou', 'Émouvant', 'Haletant', 'Drôle', 'Sombre', 'Poétique', 'Dépaysant', 'Inspirant', 'Instructif', 'Lent mais beau'];
+  var PH_COLORS = [
+    ['#7A3B4F', '#F8E6D2'], ['#55692F', '#F6EBD3'], ['#B84C14', '#FFF1DE'],
+    ['#C98A1E', '#2E1B0F'], ['#2F5B5E', '#F3E8D2'], ['#5A3A28', '#F3DFC2']
+  ];
+
+  var KEY = 'coin-lecture:livres:v1';
+  var THEME_KEY = 'coin-lecture:theme';
+  function load() {
+    try { var raw = localStorage.getItem(KEY); var d = raw ? JSON.parse(raw) : []; return Array.isArray(d) ? d : []; }
+    catch (e) { return []; }
+  }
+  function persist(list) {
+    try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch (e) { return false; }
+  }
+
+  var state = { books: load(), filter: 'all', q: '', sort: 'recent', viewId: null };
+  var draft = null;
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+  function paintThemeBtn() { F('themeBtn').innerHTML = currentTheme() === 'dark' ? ICON.sun : ICON.moon; }
+  try { var t = localStorage.getItem(THEME_KEY); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
+  F('themeBtn').addEventListener('click', function () {
+    var next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    paintThemeBtn();
+  });
+
+  (function leaves() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var layer = F('leaves');
+    var n = innerWidth < 700 ? 8 : 14;
+    var cols = ['var(--pumpkin)', 'var(--mustard)', 'var(--plum)', 'var(--moss)'];
+    for (var i = 0; i < n; i++) {
+      var s = document.createElement('span');
+      var size = 16 + Math.random() * 22;
+      s.className = 'fall';
+      s.style.cssText = 'left:' + (Math.random() * 100) + '%;width:' + size + 'px;height:' + size + 'px;color:' + cols[i % 4] +
+        ';animation-duration:' + (15 + Math.random() * 15) + 's;animation-delay:-' + (Math.random() * 28) + 's;--dx:' +
+        (Math.random() * 180 - 90) + 'px;--rot:' + ((Math.random() > .5 ? 1 : -1) * (300 + Math.random() * 200)) + 'deg';
+      s.innerHTML = LEAF;
+      layer.appendChild(s);
+    }
+  })();
+
+  var toastT;
+  function toast(msg) {
+    var el = F('toast'); el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove('show'); }, 3200);
+  }
+
+  function hash(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+  function coverHTML(b, big) {
+    if (b.cover) return '<img src="' + b.cover + '" alt="Couverture de ' + esc(b.title) + '">';
+    var c = PH_COLORS[hash(b.title + b.author) % PH_COLORS.length];
+    return '<div class="ph' + (big ? ' big' : '') + '" style="--c:' + c[0] + ';--t:' + c[1] + '"><span class="ph-title">' + esc(b.title) + '</span><span class="ph-author">' + esc(b.author) + '</span>' + LEAF + '</div>';
+  }
+  function starsHTML(n) {
+    if (!n) return '';
+    var out = '<span class="stars" role="img" aria-label="Note : ' + n + ' sur 5">';
+    for (var i = 1; i <= 5; i++) out += '<span class="' + (i <= n ? 'on' : '') + '">' + LEAF + '</span>';
+    return out + '</span>';
+  }
+  function fmtDate(d) {
+    if (!d) return '';
+    var dt = new Date(d + 'T12:00:00');
+    return isNaN(dt) ? '' : dt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function visible() {
+    var q = norm(state.q);
+    var list = state.books.filter(function (b) {
+      return (state.filter === 'all' || b.status === state.filter) &&
+        (!q || norm(b.title + ' ' + b.author + ' ' + (b.genre || '')).indexOf(q) !== -1);
+    });
+    var s = state.sort;
+    list.sort(function (a, b) {
+      if (s === 'title') return a.title.localeCompare(b.title, 'fr');
+      if (s === 'author') return a.author.localeCompare(b.author, 'fr');
+      if (s === 'rating') return (b.rating || 0) - (a.rating || 0) || b.updatedAt - a.updatedAt;
+      return b.updatedAt - a.updatedAt;
+    });
+    return list;
+  }
+
+  function render() {
+    var total = state.books.length;
+    var read = state.books.filter(function (b) { return b.status === 'read'; }).length;
+    var cur = state.books.filter(function (b) { return b.status === 'reading'; }).length;
+    F('stats').textContent = total
+      ? plural(total, 'livre', 'livres') + ' dans ma bibliothèque, ' + read + (read > 1 ? ' lus' : ' lu') + (cur ? ', ' + cur + ' en cours' : '')
+      : 'Ma bibliothèque est encore vide';
+
+    var counts = { all: total, reading: cur, read: read, toread: total - read - cur };
+    var tabs = [['all', 'Tous'], ['reading', 'En cours'], ['read', 'Lus'], ['toread', 'À lire']];
+    F('tabs').innerHTML = tabs.map(function (t) {
+      return '<button type="button" class="tab" data-f="' + t[0] + '" aria-pressed="' + (state.filter === t[0]) + '">' + t[1] + '<span>' + counts[t[0]] + '</span></button>';
+    }).join('');
+
+    var list = visible();
+    var grid = F('grid'), empty = F('empty');
+    document.querySelector('.toolbar').hidden = total === 0;
+    if (!list.length) {
+      grid.innerHTML = '';
+      empty.hidden = false;
+      if (!total) {
+        empty.innerHTML = EMPTY_SVG + '<h2>Ton étagère t\'attend</h2><p>Crée ta première fiche : le titre, ton avis, et une jolie couverture pour la retrouver d\'un coup d\'œil.</p><div class="row"><button class="btn primary" type="button" data-act="new">' + ICON.plus + 'Créer ma première fiche</button><button class="btn ghost" type="button" data-act="sample">Voir un exemple</button></div>';
+      } else {
+        empty.innerHTML = '<h2>Aucune fiche ne correspond</h2><p>Essaie un autre mot, ou change de statut.</p><div class="row"><button class="btn ghost" type="button" data-act="reset">Tout afficher</button></div>';
+      }
+      return;
+    }
+    empty.hidden = true;
+    grid.innerHTML = list.map(function (b) {
+      return '<li><button type="button" class="card" data-id="' + b.id + '" aria-label="Ouvrir la fiche de ' + esc(b.title) + '">' +
+        '<span class="cover">' + coverHTML(b) + '</span>' +
+        '<span class="card-meta"><span class="card-title">' + esc(b.title) + '</span><span class="card-author">' + esc(b.author) + '</span>' +
+        '<span class="card-foot">' + starsHTML(b.rating) + '<span class="pill s-' + b.status + '"><i></i>' + STATUS[b.status] + '</span></span></span></button></li>';
+    }).join('');
+  }
+
+  var EMPTY_SVG = '<svg viewBox="0 0 240 170" aria-hidden="true">' +
+    '<path d="M92 14c-4 6 4 9 0 15M108 10c-4 6 4 9 0 15" fill="none" stroke="var(--ink-soft)" stroke-width="3" stroke-linecap="round"/>' +
+    '<rect x="76" y="40" width="52" height="34" rx="9" fill="var(--pumpkin)"/><path d="M128 47h6a8 8 0 0 1 0 16h-6" fill="none" stroke="var(--pumpkin)" stroke-width="5" stroke-linecap="round"/>' +
+    '<rect x="28" y="116" width="150" height="24" rx="4" fill="var(--plum)"/><rect x="40" y="94" width="128" height="22" rx="4" fill="var(--moss)"/><rect x="22" y="72" width="140" height="22" rx="4" fill="var(--mustard)"/>' +
+    '<path d="M36 128h122M52 105h90M34 83h110" stroke="var(--on-accent)" stroke-width="2" stroke-linecap="round" opacity=".5"/>' +
+    '<rect x="14" y="140" width="176" height="6" rx="3" fill="var(--ink)" opacity=".8"/>' +
+    '<g class="leaf-deco" style="color:var(--pumpkin)"><svg x="190" y="110" width="30" height="30" viewBox="0 0 24 24" class="leaf" style="--leaf-fill:var(--mustard);color:var(--mustard);--vein:var(--paper)"><path class="shape" d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/><path class="vein" d="M4 20 14 10"/></svg></g>' +
+    '</svg>';
+
+  function openView(id) {
+    var b = state.books.find(function (x) { return x.id === id; });
+    if (!b) return;
+    state.viewId = id;
+    var meta = [];
+    if (b.genre) meta.push(b.genre);
+    if (b.year) meta.push('Paru en ' + b.year);
+    if (b.pages) meta.push(b.pages + ' pages');
+    if (b.publisher) meta.push(b.publisher);
+    var dates = [];
+    if (b.started && b.status !== 'toread') dates.push('Commencé le ' + fmtDate(b.started));
+    if (b.finished && b.status === 'read') dates.push('Terminé le ' + fmtDate(b.finished));
+    var html = '<div class="view-grid"><div class="cover">' + coverHTML(b, true) + '</div><div>' +
+      '<h2 class="v-title" id="v-title">' + esc(b.title) + '</h2>' +
+      '<p class="v-author">' + esc(b.author) + '</p>' +
+      (meta.length ? '<div class="v-meta">' + meta.map(function (m) { return '<span class="m">' + esc(m) + '</span>'; }).join('') + '</div>' : '') +
+      '<div class="v-status"><span class="pill s-' + b.status + '"><i></i>' + STATUS[b.status] + '</span>' + starsHTML(b.rating) + '</div>' +
+      (dates.length ? '<p class="v-dates">' + esc(dates.join(', ')) + '</p>' : '') +
+      (b.moods && b.moods.length ? '<div class="chips">' + b.moods.map(function (m) { return '<span class="chip static">' + esc(m) + '</span>'; }).join('') + '</div>' : '') +
+      (b.summary ? '<section class="v-sec"><h3>Résumé</h3><p>' + esc(b.summary) + '</p></section>' : '') +
+      (b.review ? '<section class="v-sec"><h3>Mon avis</h3><p>' + esc(b.review) + '</p></section>' : '') +
+      (b.quote ? '<section class="v-sec"><h3>Passage préféré</h3><blockquote>' + esc(b.quote) + '</blockquote></section>' : '') +
+      (!b.summary && !b.review && !b.quote ? '<p class="v-none">Pas encore d\'avis écrit. Modifie la fiche pour ajouter ton résumé et tes impressions.</p>' : '') +
+      '</div></div>';
+    F('viewBody').innerHTML = html;
+    F('viewActions').innerHTML = '<button type="button" class="btn ghost" id="delBtn">Supprimer la fiche</button><button type="button" class="btn primary" id="editBtn">' + ICON.pen + 'Modifier la fiche</button>';
+    F('viewBody').scrollTop = 0;
+    if (!F('viewDlg').open) F('viewDlg').showModal();
+  }
+
+  function renderRating() {
+    var h = '';
+    for (var i = 1; i <= 5; i++) {
+      h += '<button type="button" class="leaf-btn' + (i <= draft.rating ? ' on' : '') + '" data-v="' + i + '" aria-pressed="' + (i === draft.rating) + '" aria-label="Note ' + i + ' sur 5">' + LEAF + '</button>';
+    }
+    F('ratingInput').innerHTML = h;
+    F('ratingText').textContent = draft.rating ? draft.rating + ' sur 5' : 'Pas encore de note';
+  }
+  function renderMoods() {
+    F('moods').innerHTML = MOODS.map(function (m) {
+      return '<button type="button" class="chip" data-m="' + esc(m) + '" aria-pressed="' + (draft.moods.indexOf(m) !== -1) + '">' + esc(m) + '</button>';
+    }).join('');
+  }
+  function renderCover() {
+    var btn = F('coverBtn');
+    if (draft.cover) {
+      btn.className = 'cover-drop has';
+      btn.innerHTML = '<img src="' + draft.cover + '" alt="Aperçu de la couverture">';
+      btn.setAttribute('aria-label', 'Changer l\'image de couverture');
+    } else {
+      btn.className = 'cover-drop';
+      btn.innerHTML = '<span>' + ICON.image + 'Ajouter une couverture<small>Touche ici ou glisse une image</small></span>';
+      btn.setAttribute('aria-label', 'Choisir une image de couverture');
+    }
+    F('coverRemove').hidden = !draft.cover;
+  }
+  function syncDates() {
+    var st = document.querySelector('input[name="status"]:checked').value;
+    F('startedField').hidden = st === 'toread';
+    F('finishedField').hidden = st !== 'read';
+    if (st === 'read' && !F('f-finished').value) F('f-finished').value = new Date().toISOString().slice(0, 10);
+  }
+  function openForm(id) {
+    var b = id ? state.books.find(function (x) { return x.id === id; }) : null;
+    draft = { id: b ? b.id : null, cover: b ? b.cover || null : null, rating: b ? b.rating || 0 : 0, moods: b ? (b.moods || []).slice() : [] };
+    F('formTitle').textContent = b ? 'Modifier la fiche' : 'Nouvelle fiche';
+    F('f-title').value = b ? b.title : '';
+    F('f-author').value = b ? b.author : '';
+    F('f-genre').value = b ? b.genre || '' : '';
+    F('f-publisher').value = b ? b.publisher || '' : '';
+    F('f-year').value = b ? b.year || '' : '';
+    F('f-pages').value = b ? b.pages || '' : '';
+    F('f-started').value = b ? b.started || '' : '';
+    F('f-finished').value = b ? b.finished || '' : '';
+    F('f-summary').value = b ? b.summary || '' : '';
+    F('f-review').value = b ? b.review || '' : '';
+    F('f-quote').value = b ? b.quote || '' : '';
+    F('st-' + (b ? b.status : 'toread')).checked = true;
+    syncDates();
+    renderRating(); renderMoods(); renderCover();
+    F('formDlg').showModal();
+    F('formDlg').querySelector('.dlg-body').scrollTop = 0;
+    if (!b) F('f-title').focus();
+  }
+
+  function fileToCover(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onerror = reject;
+      r.onload = function () {
+        var img = new Image();
+        img.onerror = reject;
+        img.onload = function () {
+          var scale = Math.min(1, 520 / img.width, 780 / img.height);
+          var c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * scale));
+          c.height = Math.max(1, Math.round(img.height * scale));
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = r.result;
+      };
+      r.readAsDataURL(file);
+    });
+  }
+  function takeFile(file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { toast('Choisis un fichier image (JPG, PNG…)'); return; }
+    fileToCover(file).then(function (d) { draft.cover = d; renderCover(); })
+      .catch(function () { toast('Cette image n\'a pas pu être lue. Essaie-en une autre.'); });
+  }
+
+  function saveBook(e) {
+    e.preventDefault();
+    var st = document.querySelector('input[name="status"]:checked').value;
+    var prev = JSON.stringify(state.books);
+    var now = Date.now();
+    var data = {
+      title: F('f-title').value.trim(), author: F('f-author').value.trim(),
+      genre: F('f-genre').value.trim(), publisher: F('f-publisher').value.trim(),
+      year: F('f-year').value ? parseInt(F('f-year').value, 10) : '', pages: F('f-pages').value ? parseInt(F('f-pages').value, 10) : '',
+      status: st, started: st === 'toread' ? '' : F('f-started').value, finished: st === 'read' ? F('f-finished').value : '',
+      rating: draft.rating, summary: F('f-summary').value.trim(), review: F('f-review').value.trim(), quote: F('f-quote').value.trim(),
+      moods: draft.moods.slice(), cover: draft.cover, updatedAt: now
+    };
+    var savedId;
+    if (draft.id) {
+      state.books = state.books.map(function (b) { return b.id === draft.id ? Object.assign({}, b, data) : b; });
+      savedId = draft.id;
+    } else {
+      savedId = uid();
+      state.books = [Object.assign({ id: savedId, createdAt: now }, data)].concat(state.books);
+    }
+    if (!persist(state.books)) {
+      state.books = JSON.parse(prev);
+      toast('Espace plein : retire quelques couvertures pour enregistrer.');
+      return;
+    }
+    F('formDlg').close();
+    render();
+    toast('Fiche enregistrée');
+    if (F('viewDlg').open) openView(savedId);
+  }
+
+  function addSample() {
+    var now = Date.now();
+    state.books = [{
+      id: uid(), createdAt: now, updatedAt: now, title: 'Le Petit Prince', author: 'Antoine de Saint-Exupéry', genre: 'Conte philosophique',
+      publisher: 'Gallimard', year: 1943, pages: 96, status: 'read', started: '', finished: new Date().toISOString().slice(0, 10), rating: 5,
+      summary: 'Un aviateur en panne dans le désert croise un petit garçon venu d\'une minuscule planète. Au fil de leurs conversations, celui-ci raconte ses rencontres et son amitié avec une rose.',
+      review: 'Un livre qui se relit à chaque saison de la vie. Les phrases sont simples, et pourtant elles se déploient différemment selon l\'âge qu\'on a. À lire un dimanche de pluie, sous un plaid.',
+      quote: '', moods: ['Doudou', 'Poétique'], cover: null
+    }].concat(state.books);
+    persist(state.books);
+    render();
+    toast('Exemple ajouté. Tu peux l\'ouvrir, le modifier ou le supprimer.');
+  }
+
+  F('newBtn').innerHTML = ICON.plus + 'Nouvelle fiche';
+  document.querySelectorAll('[data-close]').forEach(function (b) { if (!b.textContent.trim()) b.innerHTML = ICON.x; });
+  paintThemeBtn();
+
+  F('newBtn').addEventListener('click', function () { openForm(null); });
+  F('q').addEventListener('input', function (e) { state.q = e.target.value; render(); });
+  F('sort').addEventListener('change', function (e) { state.sort = e.target.value; render(); });
+  F('tabs').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-f]'); if (!t) return;
+    state.filter = t.dataset.f; render();
+  });
+  F('grid').addEventListener('click', function (e) {
+    var c = e.target.closest('[data-id]'); if (c) openView(c.dataset.id);
+  });
+  F('empty').addEventListener('click', function (e) {
+    var a = e.target.closest('[data-act]'); if (!a) return;
+    if (a.dataset.act === 'new') openForm(null);
+    if (a.dataset.act === 'sample') addSample();
+    if (a.dataset.act === 'reset') { state.q = ''; state.filter = 'all'; F('q').value = ''; render(); }
+  });
+
+  var delTimer;
+  F('viewActions').addEventListener('click', function (e) {
+    var id = state.viewId;
+    if (e.target.closest('#editBtn')) { F('viewDlg').close(); openForm(id); return; }
+    var del = e.target.closest('#delBtn');
+    if (!del) return;
+    if (!del.dataset.sure) {
+      del.dataset.sure = '1'; del.textContent = 'Confirmer la suppression'; del.className = 'btn danger';
+      clearTimeout(delTimer);
+      delTimer = setTimeout(function () { del.dataset.sure = ''; del.textContent = 'Supprimer la fiche'; del.className = 'btn ghost'; }, 4000);
+      return;
+    }
+    var prev = JSON.stringify(state.books);
+    state.books = state.books.filter(function (b) { return b.id !== id; });
+    if (!persist(state.books)) { state.books = JSON.parse(prev); toast('La suppression n\'a pas pu être enregistrée.'); return; }
+    F('viewDlg').close(); render(); toast('Fiche supprimée');
+  });
+
+  F('form').addEventListener('submit', saveBook);
+  F('coverBtn').addEventListener('click', function () { F('coverFile').click(); });
+  F('coverFile').addEventListener('change', function (e) { takeFile(e.target.files[0]); e.target.value = ''; });
+  F('coverRemove').addEventListener('click', function () { draft.cover = null; renderCover(); });
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    F('coverBtn').addEventListener(ev, function (e) { e.preventDefault(); F('coverBtn').classList.add('over'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    F('coverBtn').addEventListener(ev, function (e) { e.preventDefault(); F('coverBtn').classList.remove('over'); });
+  });
+  F('coverBtn').addEventListener('drop', function (e) { takeFile(e.dataTransfer.files[0]); });
+
+  document.querySelectorAll('input[name="status"]').forEach(function (r) { r.addEventListener('change', syncDates); });
+  F('ratingInput').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-v]'); if (!b) return;
+    var v = parseInt(b.dataset.v, 10);
+    draft.rating = draft.rating === v ? 0 : v;
+    renderRating();
+    var again = F('ratingInput').querySelector('[data-v="' + v + '"]'); if (again) again.focus();
+  });
+  F('moods').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-m]'); if (!b) return;
+    var m = b.dataset.m, i = draft.moods.indexOf(m);
+    if (i === -1) draft.moods.push(m); else draft.moods.splice(i, 1);
+    b.setAttribute('aria-pressed', String(i === -1));
+  });
+
+  [F('viewDlg'), F('formDlg')].forEach(function (d) {
+    d.addEventListener('click', function (e) {
+      if (e.target === d || e.target.closest('[data-close]')) d.close();
+    });
+    d.addEventListener('close', function () {
+      if (!document.querySelector('dialog[open]')) document.body.style.overflow = '';
+    });
+    new MutationObserver(function () { if (d.open) document.body.style.overflow = 'hidden'; }).observe(d, { attributes: true, attributeFilter: ['open'] });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
